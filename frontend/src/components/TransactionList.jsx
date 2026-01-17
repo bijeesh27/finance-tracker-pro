@@ -79,7 +79,7 @@ export const TransactionList = () => {
                   </span>
                   <button
                     onClick={() => deleteTransaction(transaction._id)}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                   >
                     <Trash2 size={16} />
                   </button>

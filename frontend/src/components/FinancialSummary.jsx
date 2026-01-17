@@ -138,8 +138,8 @@ export const FinancialSummary = () => {
         </div>
 
         {data.length > 0 ? (
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1 relative min-h-[160px]">
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="h-[220px] lg:flex-1 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -161,16 +161,6 @@ export const FinancialSummary = () => {
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-
-              {/* Center Text */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center">
-                  <p className="text-xs font-bold text-gray-400 uppercase">
-                    Total
-                  </p>
-                  <p className="text-lg font-black text-gray-900">₹{expense}</p>
-                </div>
-              </div>
             </div>
 
             {/* Legend */}
