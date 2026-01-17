@@ -10,6 +10,23 @@ const TransactionSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Please add a positive or negative number"],
   },
+  category: {
+    type: String,
+    required: [true, "Please add a category"],
+    enum: [
+      "Food",
+      "Rent",
+      "Salary",
+      "Entertainment",
+      "Shopping",
+      "Travel",
+      "Utilities",
+      "Health",
+      "Education",
+      "Other",
+    ],
+    default: "Food",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
