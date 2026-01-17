@@ -17,6 +17,6 @@ app.use(cors());
 connectDB();
 
 
-app.use("/api/transactions", require("./routes/transactionRoutes"));
+app.use("/", require("./routes/transactionRoutes"));
 
 app.listen(port, () => console.log(`Server started on port ${port}`.cyan.bold));

@@ -17,7 +17,7 @@ export const GlobalProvider = ({ children }) => {
   // Actions
   async function getTransactions() {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/transactions`);
+      const res = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}`);
       dispatch({
         type: 'GET_TRANSACTIONS',
         payload: res.data.data
@@ -32,7 +32,7 @@ export const GlobalProvider = ({ children }) => {
 
   async function deleteTransaction(id) {
     try {
-      await axios.delete(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/transactions/${id}`);
+      await axios.delete(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/${id}`);
       dispatch({
         type: 'DELETE_TRANSACTION',
         payload: id
@@ -53,7 +53,7 @@ export const GlobalProvider = ({ children }) => {
     }
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/transactions`, transaction, config);
+      const res = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}`, transaction, config);
       dispatch({
         type: 'ADD_TRANSACTION',
         payload: res.data.data

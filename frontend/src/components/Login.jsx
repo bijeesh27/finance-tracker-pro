@@ -13,7 +13,7 @@ const Login = () => {
 
   // Fetch users from your backend
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/transactions/users`)
+    fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users`)
       .then((res) => res.json())
       .then((res) => {
         // Accessing res.data.users based on your previous snippet
