@@ -1,13 +1,21 @@
 import { useState, useContext } from "react";
 import { GlobalContext } from "../context/GlobalState";
 import { motion } from "framer-motion";
-import { Plus, Tag, IndianRupee, Type } from "lucide-react";
+import {
+  Plus,
+  Tag,
+  IndianRupee,
+  Type,
+  ArrowDownCircle,
+  ArrowUpCircle,
+} from "lucide-react";
 import { CATEGORIES } from "../utils/constants";
 
 export const AddTransaction = () => {
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
+  const [type, setType] = useState("expense"); // 'income' or 'expense'
 
   const [error, setError] = useState("");
 
@@ -22,29 +30,33 @@ export const AddTransaction = () => {
       return;
     }
 
-    if (isNaN(amount) || amount === 0) {
+    if (isNaN(amount) || parseFloat(amount) === 0) {
       setError("Please enter a valid non-zero amount");
       return;
     }
 
+    const finalAmount =
+      type === "expense" ? -Math.abs(amount) : Math.abs(amount);
+
     const newTransaction = {
       text,
-      amount: +amount,
+      amount: finalAmount,
       category,
     };
 
     addTransaction(newTransaction);
     setText("");
     setAmount("");
+    setType("expense");
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="w-full max-w-sm mx-auto flex flex-col justify-center h-full"
+      className="w-full max-w-sm mx-auto flex flex-col justify-center h-full sm:px-0"
     >
-      <div className="flex items-center gap-4 mb-10">
+      <div className="flex items-center gap-4 mb-8">
         <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl shadow-sm border border-indigo-100">
           <Plus size={28} />
         </div>
@@ -65,6 +77,32 @@ export const AddTransaction = () => {
       )}
 
       <form onSubmit={onSubmit} className="space-y-6">
+        {/* Type Toggle */}
+        <div className="grid grid-cols-2 gap-3 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+          <button
+            type="button"
+            onClick={() => setType("expense")}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+              type === "expense"
+                ? "bg-white text-red-500 shadow-sm border border-gray-100"
+                : "text-gray-400 hover:bg-gray-100"
+            }`}
+          >
+            <ArrowDownCircle size={18} /> Expense
+          </button>
+          <button
+            type="button"
+            onClick={() => setType("income")}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+              type === "income"
+                ? "bg-white text-green-500 shadow-sm border border-gray-100"
+                : "text-gray-400 hover:bg-gray-100"
+            }`}
+          >
+            <ArrowUpCircle size={18} /> Income
+          </button>
+        </div>
+
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
             <Type size={12} /> Description
@@ -110,25 +148,24 @@ export const AddTransaction = () => {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
+              min="0"
             />
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
               ₹
             </span>
           </div>
-          <p className="text-[10px] text-gray-400 font-medium mt-2 px-1 text-center">
-            Use <span className="text-red-500 font-bold">negative</span> for
-            expenses and{" "}
-            <span className="text-green-500 font-bold">positive</span> for
-            income
-          </p>
         </div>
 
         <motion.button
           whileTap={{ scale: 0.98 }}
           whileHover={{ scale: 1.02, translateY: -2 }}
-          className="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all duration-300 flex items-center justify-center gap-2 tracking-wide mt-4"
+          className={`w-full py-4 text-white font-bold rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 tracking-wide mt-4 ${
+            type === "expense"
+              ? "bg-indigo-600 shadow-indigo-200 hover:shadow-indigo-300"
+              : "bg-green-600 shadow-green-200 hover:shadow-green-300"
+          }`}
         >
-          Add Transaction
+          Add {type === "expense" ? "Expense" : "Income"}
         </motion.button>
       </form>
     </motion.div>
