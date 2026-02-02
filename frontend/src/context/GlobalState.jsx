@@ -2,6 +2,32 @@ import React, { createContext, useReducer } from "react";
 import { AppReducer } from "./AppReducer";
 import axios from "axios";
 
+// Helper to get current month range
+const getCurrentMonthRange = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+  return {
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+    type: "month",
+    label: start.toLocaleDateString("en-IN", {
+      month: "long",
+      year: "numeric",
+    }),
+  };
+};
+
+const defaultFilter = getCurrentMonthRange();
+
 // Initial State
 const initialState = {
   transactions: [],
@@ -16,11 +42,7 @@ const initialState = {
   },
   currentPage: 1,
   editingTransaction: null,
-  dateFilter: {
-    startDate: null,
-    endDate: null,
-    type: "all", // "all", "day", "month"
-  },
+  dateFilter: defaultFilter,
 };
 
 export const GlobalContext = createContext(initialState);
