@@ -12,30 +12,34 @@ import {
 import { CATEGORIES, getCategoryColor } from "../utils/constants";
 
 export const FinancialSummary = () => {
-  const { transactions } = useContext(GlobalContext);
+  const {
+    transactions = [],
+    summary = {},
+    dateFilter,
+    loading,
+    error,
+  } = useContext(GlobalContext);
 
   // Balance Logic
-  const amounts = transactions.map((transaction) => transaction.amount);
-  const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2);
-  const income = amounts
-    .filter((item) => item > 0)
-    .reduce((acc, item) => (acc += item), 0)
-    .toFixed(2);
-  const expense = (
-    amounts.filter((item) => item < 0).reduce((acc, item) => (acc += item), 0) *
-    -1
-  ).toFixed(2);
+  const total = summary?.totalBalance || 0;
+  const income = summary?.totalIncome || 0;
+  const expense = summary?.totalExpense || 0;
   const isPositive = total >= 0;
 
-  // Chart Logic - Group by Category
-  const data = transactions.reduce((acc, curr) => {
-    if (curr.amount < 0) {
-      const found = acc.find((item) => item.name === curr.category);
-      if (found) found.value += Math.abs(curr.amount);
-      else acc.push({ name: curr.category, value: Math.abs(curr.amount) });
-    }
-    return acc;
-  }, []);
+  // Chart Logic - Using pre-aggregated stats from backend summary (or local if not available)
+  const data = summary?.spendingByCategory
+    ? Object.entries(summary.spendingByCategory).map(([name, value]) => ({
+        name,
+        value,
+      }))
+    : transactions.reduce((acc, curr) => {
+        if (curr.amount < 0) {
+          const found = acc.find((item) => item.name === curr.category);
+          if (found) found.value += Math.abs(curr.amount);
+          else acc.push({ name: curr.category, value: Math.abs(curr.amount) });
+        }
+        return acc;
+      }, []);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -133,11 +137,22 @@ export const FinancialSummary = () => {
             Spending
           </h3>
           <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-full">
-            This Month
+            {dateFilter.type === "all" ? "All Time" : dateFilter.label}
           </span>
         </div>
 
-        {data.length > 0 ? (
+        {loading ? (
+          <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+            <div className="w-10 h-10 border-4 border-indigo-50 border-t-indigo-500 rounded-full animate-spin"></div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              Updating Stats...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-red-500 text-center px-4">
+            <p className="text-xs font-bold leading-relaxed">{error}</p>
+          </div>
+        ) : data.length > 0 ? (
           <div className="flex-1 flex flex-col min-h-0">
             <div className="h-[220px] lg:flex-1 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
@@ -183,7 +198,9 @@ export const FinancialSummary = () => {
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-300">
-            <div className="w-16 h-16 rounded-full border-4 border-gray-100 border-t-gray-200 animate-spin mb-3"></div>
+            <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+              <IndianRupee size={24} className="opacity-20" />
+            </div>
             <p className="text-xs font-semibold">No expense data</p>
           </div>
         )}

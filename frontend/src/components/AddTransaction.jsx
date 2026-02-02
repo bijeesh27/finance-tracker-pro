@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { GlobalContext } from "../context/GlobalState";
 import { motion } from "framer-motion";
 import {
@@ -8,6 +8,8 @@ import {
   Type,
   ArrowDownCircle,
   ArrowUpCircle,
+  Edit2,
+  X,
 } from "lucide-react";
 import { CATEGORIES } from "../utils/constants";
 
@@ -19,7 +21,26 @@ export const AddTransaction = () => {
 
   const [error, setError] = useState("");
 
-  const { addTransaction } = useContext(GlobalContext);
+  const {
+    addTransaction,
+    editTransaction,
+    editingTransaction,
+    setEditingTransaction,
+  } = useContext(GlobalContext);
+
+  useEffect(() => {
+    if (editingTransaction) {
+      setText(editingTransaction.text);
+      setAmount(Math.abs(editingTransaction.amount));
+      setCategory(editingTransaction.category);
+      setType(editingTransaction.amount < 0 ? "expense" : "income");
+    } else {
+      setText("");
+      setAmount("");
+      setCategory("Food");
+      setType("expense");
+    }
+  }, [editingTransaction]);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -38,16 +59,29 @@ export const AddTransaction = () => {
     const finalAmount =
       type === "expense" ? -Math.abs(amount) : Math.abs(amount);
 
-    const newTransaction = {
+    const transactionData = {
       text,
       amount: finalAmount,
       category,
     };
 
-    addTransaction(newTransaction);
-    setText("");
-    setAmount("");
-    setType("expense");
+    if (editingTransaction) {
+      editTransaction({ ...transactionData, _id: editingTransaction._id });
+      setEditingTransaction(null);
+    } else {
+      addTransaction(transactionData);
+    }
+
+    // Clear form if adding (if editing, the useEffect handles it when editingTransaction becomes null)
+    if (!editingTransaction) {
+      setText("");
+      setAmount("");
+      setType("expense");
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTransaction(null);
   };
 
   return (
@@ -57,15 +91,19 @@ export const AddTransaction = () => {
       className="w-full max-w-sm mx-auto flex flex-col justify-center h-full sm:px-0"
     >
       <div className="flex items-center gap-4 mb-8">
-        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl shadow-sm border border-indigo-100">
-          <Plus size={28} />
+        <div
+          className={`p-4 ${editingTransaction ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-indigo-50 text-indigo-600 border-indigo-100"} rounded-2xl shadow-sm border`}
+        >
+          {editingTransaction ? <Edit2 size={28} /> : <Plus size={28} />}
         </div>
         <div>
           <h3 className="text-2xl font-black text-gray-900 tracking-tight">
-            New Transaction
+            {editingTransaction ? "Edit Transaction" : "New Transaction"}
           </h3>
           <p className="text-sm text-gray-400 font-medium mt-1">
-            Enter details below
+            {editingTransaction
+              ? "Update details below"
+              : "Enter details below"}
           </p>
         </div>
       </div>
@@ -156,17 +194,35 @@ export const AddTransaction = () => {
           </div>
         </div>
 
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          whileHover={{ scale: 1.02, translateY: -2 }}
-          className={`w-full py-4 text-white font-bold rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 tracking-wide mt-4 ${
-            type === "expense"
-              ? "bg-indigo-600 shadow-indigo-200 hover:shadow-indigo-300"
-              : "bg-green-600 shadow-green-200 hover:shadow-green-300"
-          }`}
-        >
-          Add {type === "expense" ? "Expense" : "Income"}
-        </motion.button>
+        <div className="flex gap-3">
+          {editingTransaction && (
+            <motion.button
+              type="button"
+              onClick={cancelEdit}
+              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.02 }}
+              className="flex-1 py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <X size={18} /> Cancel
+            </motion.button>
+          )}
+          <motion.button
+            type="submit"
+            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.02, translateY: -2 }}
+            className={`flex-[2] py-4 text-white font-bold rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 tracking-wide ${
+              type === "expense"
+                ? "bg-indigo-600 shadow-indigo-200 hover:shadow-indigo-300"
+                : "bg-green-600 shadow-green-200 hover:shadow-green-300"
+            }`}
+          >
+            {editingTransaction
+              ? "Update Transaction"
+              : type === "expense"
+                ? "Add Expense"
+                : "Add Income"}
+          </motion.button>
+        </div>
       </form>
     </motion.div>
   );
